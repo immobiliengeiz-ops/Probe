@@ -1,0 +1,38 @@
+<Window x:Class="AetherPlayer.Views.Dialogs.SelectOrCreateDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Target"
+        Width="420"
+        Height="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Border Style="{StaticResource PanelCardStyle}" Margin="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="DialogTitle" FontSize="22" FontWeight="Bold" />
+
+            <ListBox x:Name="ExistingItemsList"
+                     Grid.Row="1"
+                     Margin="0,12,0,12"
+                     Background="#111623"
+                     BorderThickness="1"
+                     BorderBrush="{StaticResource BrushBorder}" />
+
+            <TextBox x:Name="NewNameTextBox"
+                     Grid.Row="2"
+                     Margin="0,0,0,12"
+                     ToolTip="Create a new target" />
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="90" Margin="0,0,8,0" Click="Cancel_OnClick" />
+                <Button Content="Confirm" Width="90" Click="Confirm_OnClick" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
