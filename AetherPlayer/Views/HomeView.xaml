@@ -1,0 +1,169 @@
+<UserControl x:Class="AetherPlayer.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodels="clr-namespace:AetherPlayer.ViewModels">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Home" FontSize="30" FontWeight="Bold" Margin="0,0,0,14" />
+
+        <Border Grid.Row="1" Style="{StaticResource PanelCardStyle}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Tag="GlobalSearchBox" Margin="0,0,10,8" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="Search by title, artist, or album" />
+                <ComboBox Grid.Column="1" Margin="0,0,10,8" ItemsSource="{Binding Genres}" SelectedItem="{Binding SelectedGenreFilter}" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" />
+                <ComboBox Grid.Column="2" Margin="0,0,10,8" ItemsSource="{Binding Moods}" SelectedItem="{Binding SelectedMoodFilter}" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" />
+                <ComboBox Grid.Column="3" Margin="0,0,0,8" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSortOption}" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" />
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <Button Content="Add Music Folder" Command="{Binding PickLibraryFolderCommand}" />
+                    <Button Content="Re-scan" Margin="8,0,0,0" Command="{Binding RescanLibraryCommand}" />
+                    <Button Content="Refresh Metadata" Margin="8,0,0,0" Command="{Binding RefreshMetadataCommand}" />
+                    <Button Content="Check Missing" Margin="8,0,0,0" Command="{Binding ValidateLibraryCommand}" />
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" Text="Folders: " />
+                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource BrushPrimary}" Text="{Binding LibraryFolders.Count, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Bulk Favorite" Command="{Binding BulkToggleFavoriteCommand}" Margin="0,0,8,0" />
+                    <Button Content="Queue Selected" Command="{Binding AddSelectionToQueueCommand}" Margin="0,0,8,0" />
+                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}">
+                        <Run Text="Queue: " />
+                        <Run Text="{Binding QueueCount, Mode=OneWay}" />
+                        <Run Text=" • Imported: " />
+                        <Run Text="{Binding ImportedTrackCount, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="2" Margin="0,0,0,10" Foreground="{StaticResource BrushTextSubtle}" Text="{Binding ImportStatusMessage, Mode=OneWay}"/>
+
+        <Grid Grid.Row="2" Margin="0,24,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="170" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Albums}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource PanelCardStyle}" Width="240" Margin="0,0,14,0">
+                                <StackPanel>
+                                    <Image Source="{Binding CoverPath, Converter={StaticResource ImagePathFallbackConverter}}" Height="90" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="0,10,0,2" />
+                                    <TextBlock Text="{Binding Artist}" Foreground="{StaticResource BrushTextSubtle}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border Grid.Row="1" Style="{StaticResource PanelCardStyle}" Padding="0,8,0,0">
+                <Grid>
+                    <ListView x:Name="TracksList" SelectionMode="Extended"
+                              ItemsSource="{Binding TracksView}"
+                              SelectedItem="{Binding SelectedTrack}"
+                              MouseDoubleClick="TracksList_OnMouseDoubleClick"
+                              SelectionChanged="TracksList_OnSelectionChanged"
+                              Background="Transparent">
+                        <ListView.ItemTemplate>
+                            <DataTemplate DataType="{x:Type viewmodels:TrackViewModel}">
+                                <Grid Margin="10,8">
+                                <Grid.ContextMenu>
+                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                        <MenuItem Header="Play" Command="{Binding DataContext.ContextPlayCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Play Next" Command="{Binding DataContext.ContextPlayNextCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Add to Playlist" Command="{Binding DataContext.ContextAddToPlaylistCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Add to Collection" Command="{Binding DataContext.ContextAddToCollectionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <Separator />
+                                        <MenuItem Header="Toggle Favorite" Command="{Binding DataContext.ContextToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Remove from Library" Command="{Binding DataContext.ContextRemoveFromLibraryCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Open File Location" Command="{Binding DataContext.ContextOpenFileLocationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Relink Missing File" Command="{Binding DataContext.RelinkTrackCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="300" />
+                                        <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="36" />
+                                        <ColumnDefinition Width="36" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="{Binding CoverPath, Converter={StaticResource ImagePathFallbackConverter}}" Width="44" Height="44" Stretch="UniformToFill" />
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Artist}" Foreground="{StaticResource BrushTextSubtle}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding AvailabilityText}" Foreground="#F29A7D" FontSize="11" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="{Binding Album}" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Genre}" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="4" Text="{Binding MoodTagsDisplay}" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="5" Text="{Binding DurationDisplay}" VerticalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" />
+                                    <TextBlock Grid.Column="6" Text="{Binding RatingStars}" VerticalAlignment="Center" Foreground="{StaticResource BrushPrimary}" />
+                                    <Button Grid.Column="7" Content="♥" FontSize="14" Padding="0" Background="Transparent" Foreground="{Binding IsFavorite, Converter={StaticResource BoolToBrushConverter}}" Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                    <Button Grid.Column="8" Content="+" FontSize="14" Padding="0" ToolTip="Play Next" Background="Transparent" Command="{Binding DataContext.AddToQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Your library is empty." FontSize="20" HorizontalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" />
+                        <TextBlock Text="Use 'Add Music Folder' to build your library." HorizontalAlignment="Center" Foreground="{StaticResource BrushTextSubtle}" />
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLibraryEmptyState}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                    </StackPanel>
+
+                    <TextBlock Text="No tracks match your current search or filters."
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="18"
+                               Foreground="{StaticResource BrushTextSubtle}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsNoResultsState}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
