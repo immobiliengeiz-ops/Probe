@@ -1,0 +1,101 @@
+<UserControl x:Class="AetherPlayer.Views.SongDetailPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodels="clr-namespace:AetherPlayer.ViewModels">
+    <Border Style="{StaticResource PanelCardStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="220" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Now Playing" FontWeight="SemiBold" FontSize="18" />
+
+            <Border Grid.Row="1" Background="#1A2030" CornerRadius="16" Padding="10" Margin="0,12,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding SelectedTrack.CoverPath, Converter={StaticResource ImagePathFallbackConverter}}" Height="100" Width="100" Stretch="UniformToFill" />
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentTrackTitle}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding CurrentTrackArtist}" Foreground="{StaticResource BrushTextSubtle}" Margin="0,4,0,0" />
+                        <TextBlock Text="{Binding SelectedTrack.AvailabilityText}" Foreground="#F29A7D" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="2">
+                <TextBlock Text="{Binding SelectedTrack.Title, TargetNullValue=Choose a song}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding SelectedTrack.Artist, TargetNullValue=Artist}" Margin="0,3,0,2" Foreground="{StaticResource BrushTextSubtle}" />
+                <TextBlock Text="{Binding SelectedTrack.Album, TargetNullValue=Album}" Foreground="{StaticResource BrushTextSubtle}" />
+                <TextBlock Text="{Binding SelectedTrack.MoodTagsDisplay}" Margin="0,8,0,0" Foreground="{StaticResource BrushPrimary}" />
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Rating:" Foreground="{StaticResource BrushTextSubtle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <Button Content="★" Command="{Binding SetRatingCommand}" CommandParameter="1" Width="28" Margin="0,0,3,0" />
+                    <Button Content="★" Command="{Binding SetRatingCommand}" CommandParameter="2" Width="28" Margin="0,0,3,0" />
+                    <Button Content="★" Command="{Binding SetRatingCommand}" CommandParameter="3" Width="28" Margin="0,0,3,0" />
+                    <Button Content="★" Command="{Binding SetRatingCommand}" CommandParameter="4" Width="28" Margin="0,0,3,0" />
+                    <Button Content="★" Command="{Binding SetRatingCommand}" CommandParameter="5" Width="28" />
+                </StackPanel>
+                <TextBlock Text="{Binding SelectedTrack.RatingStars}" Margin="0,6,0,0" Foreground="{StaticResource BrushPrimary}" />
+            </StackPanel>
+
+            <Border Grid.Row="3" Background="#111623" CornerRadius="12" Padding="10" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Queue" FontWeight="SemiBold" Foreground="{StaticResource BrushText}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding QueueTracks}" SelectedItem="{Binding SelectedQueueTrack}" Background="#111623" BorderBrush="{StaticResource BrushBorder}" Foreground="{StaticResource BrushText}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type viewmodels:TrackViewModel}">
+                                <DockPanel Margin="0,4">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{StaticResource BrushText}" />
+                                    <TextBlock Text="{Binding Artist}" Margin="8,0,0,0" Foreground="{StaticResource BrushTextSubtle}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Button Content="Up" Width="46" Command="{Binding MoveQueueUpCommand}" CommandParameter="{Binding SelectedQueueTrack}" Margin="0,0,8,0" />
+                        <Button Content="Down" Width="56" Command="{Binding MoveQueueDownCommand}" CommandParameter="{Binding SelectedQueueTrack}" Margin="0,0,8,0" />
+                        <Button Content="Remove" Width="68" Command="{Binding RemoveQueueTrackCommand}" CommandParameter="{Binding SelectedQueueTrack}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="4" Background="#111623" CornerRadius="12" Padding="12" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Lyrics" FontWeight="SemiBold" />
+                        <Button Content="{Binding LyricsToggleText}" Command="{Binding ToggleLyricsCommand}" Padding="8,2" Margin="8,0,0,0" />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding SelectedTrack.Lyrics, TargetNullValue=Lyrics preview appears here when a track is selected.}" TextWrapping="Wrap" Foreground="{StaticResource BrushTextSubtle}" />
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLyricsCollapsed}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>
